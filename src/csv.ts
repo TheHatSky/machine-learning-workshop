@@ -4,24 +4,32 @@ import { loadSets } from "./model/loadSets";
 import { print } from "./model/print";
 import { save } from "./model/save";
 
-export async function csv() {
+interface Options {
+  set: string;
+  target: string;
+  epochs?: number;
+}
+
+console.log("\n\n");
+
+export async function csv(options: Options) {
   // We want to predict the column "medv", which represents a median value of
   // a home (in $1000s), so we mark it as a label.
   const {
     fitSet: { dataset, featuresNumber },
     controlSet: { expected: controlAnswers, tensor: controlTensor },
   } = await loadSets({
-    folder: "example",
-    target: "medv",
+    folder: options.set,
+    target: options.target,
   });
 
   // Define the model.
   const model = define({
-    name: "example",
+    name: options.set,
     inputShape: [featuresNumber],
   });
 
-  const epochs = 50;
+  const epochs = options.epochs ?? 50;
   const { loss } = await fitDataset(model, dataset, epochs);
 
   const { location } = await save(model);
